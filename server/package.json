@@ -1,0 +1,17 @@
+{
+    "private": true,
+    "scripts": {
+        "build": "tsc",
+        "start": "node --enable-source-maps dist/server/src/server.js",
+        "dev": "node --experimental-transform-types --no-warnings --watch src/server.ts"
+    },
+    "devDependencies": {
+        "@types/node": "^22.13.4",
+        "typescript": "^5.7.3"
+    },
+    "dependencies": {
+        "@hono/node-server": "^1.13.8",
+        "@hono/node-ws": "^1.0.8",
+        "hono": "^4.7.1"
+    }
+}

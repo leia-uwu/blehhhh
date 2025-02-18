@@ -1,0 +1,12 @@
+{
+    "name": "tmp-game",
+    "version": "0.0.1",
+    "scripts": {
+        "dev:server": "cd server && pnpm dev",
+        "dev:client": "cd client && pnpm dev",
+        "fmt": "dprint fmt"
+    },
+    "devDependencies": {
+        "dprint": "^0.49.0"
+    }
+}
