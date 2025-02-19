@@ -19,8 +19,7 @@ app.get(
                     return;
                 }
 
-                const stream = new ByteStream(event.data.buffer);
-                stream.index = event.data.byteOffset;
+                const stream = new ByteStream(event.data.buffer, event.data.byteOffset);
 
                 const protocol = stream.readUint32();
                 if (protocol !== GameConstants.protocol) {

@@ -3,110 +3,126 @@
  * And also supports reading and writing clamped 8 bits and 16 bits floats, UTF-8 strings and groups of booleans
  */
 export class ByteStream {
-    index = 0;
     view: DataView;
 
-    constructor(sourceOrLength: ArrayBufferLike | number) {
+    private _index = 0;
+
+    set index(index: number) {
+        if (index > this.view.byteLength || index < 0) {
+            throw new RangeError(`Index out of bounds, range: [0, [${this.view.byteLength}]]`);
+        }
+        this._index = index;
+    }
+
+    get index(): number {
+        return this._index;
+    }
+
+    constructor(
+        sourceOrLength: ArrayBufferLike | number,
+        byteOffset?: number,
+        byteLength?: number,
+    ) {
         const buffer = typeof sourceOrLength === "number"
             ? new ArrayBuffer(sourceOrLength)
             : sourceOrLength;
 
-        this.view = new DataView(buffer);
+        this.view = new DataView(buffer, byteOffset, byteLength);
     }
 
     get bytesLeft(): number {
-        return this.view.byteLength - this.index;
+        return this.view.byteLength - this._index;
     }
 
     getBuffer(): Uint8Array {
-        return new Uint8Array(this.view.buffer, 0, this.index);
+        return new Uint8Array(this.view.buffer, this.view.byteOffset, this._index);
     }
 
     writeUint8(value: number): void {
-        this.view.setUint8(this.index, value);
-        this.index += 1;
+        this.view.setUint8(this._index, value);
+        this._index += 1;
     }
 
     writeInt8(value: number): void {
-        this.view.setInt8(this.index, value);
-        this.index += 1;
+        this.view.setInt8(this._index, value);
+        this._index += 1;
     }
 
     writeUint16(value: number): void {
-        this.view.setUint16(this.index, value);
-        this.index += 2;
+        this.view.setUint16(this._index, value);
+        this._index += 2;
     }
 
     writeInt16(value: number): void {
-        this.view.setInt16(this.index, value);
-        this.index += 2;
+        this.view.setInt16(this._index, value);
+        this._index += 2;
     }
 
     writeUint32(value: number): void {
-        this.view.setUint32(this.index, value);
-        this.index += 4;
+        this.view.setUint32(this._index, value);
+        this._index += 4;
     }
 
     writeInt32(value: number): void {
-        this.view.setInt32(this.index, value);
-        this.index += 4;
+        this.view.setInt32(this._index, value);
+        this._index += 4;
     }
 
     writeFloat32(value: number): void {
-        this.view.setFloat32(this.index, value);
-        this.index += 4;
+        this.view.setFloat32(this._index, value);
+        this._index += 4;
     }
 
     writeFloat64(value: number): void {
-        this.view.setFloat64(this.index, value);
-        this.index += 8;
+        this.view.setFloat64(this._index, value);
+        this._index += 8;
     }
 
     readUint8(): number {
-        const value = this.view.getUint8(this.index);
-        this.index += 1;
+        const value = this.view.getUint8(this._index);
+        this._index += 1;
         return value;
     }
 
     readInt8(): number {
-        const value = this.view.getInt8(this.index);
-        this.index += 1;
+        const value = this.view.getInt8(this._index);
+        this._index += 1;
         return value;
     }
 
     readUint16(): number {
-        const value = this.view.getUint16(this.index);
-        this.index += 2;
+        const value = this.view.getUint16(this._index);
+        this._index += 2;
         return value;
     }
 
     readInt16(): number {
-        const value = this.view.getInt16(this.index);
-        this.index += 2;
+        const value = this.view.getInt16(this._index);
+        this._index += 2;
         return value;
     }
 
     readUint32(): number {
-        const value = this.view.getUint32(this.index);
-        this.index += 4;
+        const value = this.view.getUint32(this._index);
+        this._index += 4;
         return value;
     }
 
     readInt32(): number {
-        const value = this.view.getInt32(this.index);
-        this.index += 4;
+        const value = this.view.getInt32(this._index);
+        this._index += 4;
         return value;
     }
 
     readFloat32(): number {
-        const value = this.view.getFloat32(this.index);
-        this.index += 4;
+        const value = this.view.getFloat32(this._index);
+        this._index += 4;
         return value;
     }
 
     readFloat64(): number {
-        const value = this.view.getFloat64(this.index);
-        this.index += 8;
+        const value = this.view.getFloat64(this._index);
+        this._index += 8;
         return value;
     }
 
@@ -189,15 +205,14 @@ export class ByteStream {
      */
     readString(maxLength?: number): string {
         const chars: number[] = [];
-        const len = maxLength ?? this.view.byteLength - this.index;
+        const len = maxLength ?? this.view.byteLength - this._index;
 
         for (let i = 0; i < len; i++) {
             const char = this.readUint8();
             if (char === 0x00) {
                 break;
-            } else {
-                chars.push(char);
             }
+            chars.push(char);
         }
         return ByteStream._textDecoder.decode(new Uint8Array(chars));
     }
@@ -205,7 +220,7 @@ export class ByteStream {
     /**
      * Write a group of at maximum 8 booleans to a single byte
      */
-    writeBooleanGroup(bools: boolean[]): void {
+    writeBooleanGroup(...bools: boolean[]): void {
         if (bools.length > 8) {
             throw new RangeError(`Can only write 8 booleans at a time, received ${bools.length}`);
         }
