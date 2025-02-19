@@ -10,8 +10,8 @@ export default defineConfig({
                         return "vendor";
                     }
                 },
-            }
-        }
+            },
+        },
     },
     server: {
         port: 3000,
