@@ -17,7 +17,6 @@
         "rewriteRelativeImportExtensions": true
     },
     "include": [
-        "src",
-        "../shared/src"
+        "src"
     ]
 }
