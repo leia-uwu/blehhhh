@@ -1,32 +1,29 @@
 import { serve } from "@hono/node-server";
 import { createNodeWebSocket } from "@hono/node-ws";
 import { Hono } from "hono";
-import { ByteStream } from "../../shared/src/byteStream.ts";
-import { GameConstants } from "../../shared/src/constants.ts";
+import { DisconnectReason } from "../../shared/src/constants.ts";
+import { Game } from "./game/game.ts";
 
 const app = new Hono();
 
 const { injectWebSocket, upgradeWebSocket } = createNodeWebSocket({ app });
 
+const game = new Game();
+
 app.get(
     "/play",
-    upgradeWebSocket(c => {
+    upgradeWebSocket(() => {
         return {
-            onMessage(event, ws) {
+            onClose(_event, socket) {
+                game.onDisconnect(socket);
+            },
+            onMessage(event, socket) {
                 if (!(event.data instanceof Buffer)) {
                     console.warn(`Invalid data type: ${typeof event.data}`);
-                    ws.close();
+                    socket.close(DisconnectReason.InvalidPacket);
                     return;
                 }
-
-                const stream = new ByteStream(event.data.buffer, event.data.byteOffset);
-
-                const protocol = stream.readUint32();
-                if (protocol !== GameConstants.protocol) {
-                    ws.close();
-                }
-            },
-            onClose: () => {
+                game.onMessage(socket, event.data);
             },
         };
     }),

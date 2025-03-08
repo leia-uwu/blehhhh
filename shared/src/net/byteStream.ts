@@ -34,7 +34,12 @@ export class ByteStream {
         return this.view.byteLength - this._index;
     }
 
-    getBuffer(): Uint8Array {
+    /**
+     * Get a buffer from the start to the current index
+     * Used e.g when sending a packet to a WebSocket
+     * So you only send parts of the buffer that have been written
+     */
+    getSerializedData(): Uint8Array {
         return new Uint8Array(this.view.buffer, this.view.byteOffset, this._index);
     }
 
