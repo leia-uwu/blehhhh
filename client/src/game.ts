@@ -5,7 +5,7 @@ import {
     ConnectPacket,
     Packet,
     serverToClientPackets,
-} from "../../shared/src/net/net";
+} from "../../shared/src/net/net.ts";
 
 export class Game {
     pixi: Application;
